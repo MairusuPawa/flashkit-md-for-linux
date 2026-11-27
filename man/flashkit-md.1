@@ -1,0 +1,98 @@
+.TH FLASHKIT-MD 1 "November 2026" "FlashKitLinux" "User Commands"
+.SH NAME
+flashkit-md \- read, write, and inspect Mega Drive / 32X cartridges
+.SH SYNOPSIS
+.B flashkit-md
+.RI [ options ]
+.RI [ ROM ]
+.SH DESCRIPTION
+.B flashkit-md
+uses the FlashKit MD serial protocol to inspect a cartridge, read its ROM, or write a ROM image. The FT232 adapter is detected by USB ID 0403:6001 unless a serial port is specified.
+.PP
+Writing first checks FlashKit and CFI communication. The bundled protocol backend verifies the write on the active connection in a worker process, which exits to close the serial handle. The tool then reconnects and compares a second readback against the exact prepared image. When auto-detected, the adapter is rediscovered by USB ID after reconnect; an explicit --device path is reused. Reconnection retries for up to 20 seconds and reports an error if multiple FT232 adapters are present. The reconnect does not electrically reset or power-cycle the programmer; no documented hardware-reset command is available for this device.
+.PP
+Flash chip command compatibility depends on the chip family. Successful CFI detection alone does not guarantee that a chip supports the write sequence. The detected addressable ROM size is not a measurement of physical flash capacity. The default software write limit is 4 MiB. The reference C# GUI clamps writes at 4 MiB; raising this tool's limit does not establish that an AliExpress clone can safely store or map a larger image. Larger images require verified flash capacity and compatible mapper support.
+Some recognized cartridge metadata signatures trigger mapper-specific bank selection and timestamp preparation before writing; the prepared image is used for both verification passes.
+.SH OPTIONS
+.TP
+.BI -r, --read\ FILE
+Read the cartridge ROM into FILE. The file is overwritten only after confirmation; use --yes to skip the prompt. The size is taken from the cartridge header and limited to 32 MiB.
+.TP
+.BI -w, --write\ FILE
+Write FILE to the cartridge, then verify it on the active connection and again after reconnecting.
+.TP
+.BI -c, --check
+Check FlashKit and cartridge flash communication. This is the default when no operation is selected.
+.TP
+.B -l, --layout
+Report the ROM name, header-declared ROM size, detected addressable ROM size, and detected RAM size. It does not report the physical flash chip capacity.
+.TP
+.BI -d, --device\ PORT
+Use PORT as the serial device, for example /dev/ttyUSB0. The default is to detect a single FT232 device by USB ID. --port is accepted as an alias.
+.TP
+.B -v, --verbose
+Show reconnect attempts and device diagnostics.
+.TP
+.B -y, --yes
+Skip the write confirmation and allow overwriting a read output file.
+.TP
+.BI --max-size\ BYTES
+Set the software limit for writes. The default is 4194304 (4 MiB); 0 disables this limit. This does not detect or expand physical cartridge capacity.
+.TP
+.B -h, --help
+Show command-line help and exit.
+.SH EXAMPLES
+Check the attached cartridge:
+.PP
+.nf
+.RS
+flashkit-md --check
+.RE
+.fi
+.PP
+Show detected ROM and RAM measurements:
+.PP
+.nf
+.RS
+flashkit-md --layout
+.RE
+.fi
+.PP
+Write and reconnect-verify a ROM:
+.PP
+.nf
+.RS
+flashkit-md --write game.bin
+.RE
+.fi
+.PP
+Read a ROM from an explicitly selected port:
+.PP
+.nf
+.RS
+flashkit-md --device /dev/ttyUSB0 --read dump.bin
+.RE
+.fi
+.PP
+The positional form remains a shorthand for --write:
+.PP
+.nf
+.RS
+flashkit-md game.bin
+.RE
+.fi
+.SH EXIT STATUS
+.TP
+.B 0
+Requested operation completed successfully.
+.TP
+.B 1
+The operation was cancelled.
+.TP
+.B 2
+Input, device, flash, or verification error.
+.SH SEE ALSO
+.BR python3 (1)
+
+.SH LICENSE
+GPL-3.0-or-later; see the LICENSE file installed with the program.
