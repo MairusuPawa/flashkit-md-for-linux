@@ -1,6 +1,6 @@
 # FlashKit MD CLI
 
-A Python command-line tool for reading and writing Mega Drive / 32X cartridges with a FlashKit MD serial programmer.
+A Python command-line tool for reading and writing Mega Drive / 32X cartridges with a FlashKit MD serial programmer, based on the "FlashKit Programmer For MD" Aliexpress clones of krikzz' product.
 
 This tool (and its documentation) was fully slop-generated.
 
