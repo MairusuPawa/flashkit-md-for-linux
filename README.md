@@ -2,6 +2,8 @@
 
 A Python command-line tool for reading and writing Mega Drive / 32X cartridges with a FlashKit MD serial programmer.
 
+This tool (and its documentation) was fully slop-generated.
+
 ## Requirements
 
 - Python 3.10 or newer
